@@ -5,7 +5,7 @@ A production-quality CRUD application built with Next.js 15, TailwindCSS, TypeSc
 ## Features
 
 - **Full CRUD**: Create, Read, Update, Delete notices end-to-end
-- **Server-Side Rendering**: First page load is instant via `getServerSideProps` — no loading spinners
+- **Loading States**: Custom-built, animated Skeleton loaders to provide immediate visual feedback while data fetches client-side
 - **Load More Pagination**: Fetches notices in batches of 10 for scalability
 - **Urgent-first Ordering**: Done at the database level via Prisma `orderBy`, not client-side sorting
 - **Server-Side Validation**: All input validation runs inside API routes, not the browser
@@ -13,6 +13,7 @@ A production-quality CRUD application built with Next.js 15, TailwindCSS, TypeSc
 - **Responsive Design**: Fully responsive card layout for desktop and mobile
 - **Dark Mode**: Automatic system-level dark mode support
 - **Image Uploads**: Direct browser-to-Cloudinary image uploads with client-side compression (up to 5MB)
+- **Image Cleanup**: Secure server-side image deletion via Cloudinary Admin API when notices are updated or deleted
 - **Axios**: All client-side HTTP requests use Axios for clean error handling
 
 ## Tech Stack
@@ -42,14 +43,15 @@ A production-quality CRUD application built with Next.js 15, TailwindCSS, TypeSc
    npm install
    ```
 
-3. **Set up a hosted database**
    - Go to [TiDB Cloud](https://tidbcloud.com/) and create a free **Serverless** cluster.
    - Click **Connect** on your cluster, choose the **Prisma** driver, and copy the connection string.
+   - Go to [Cloudinary](https://cloudinary.com/) to get your cloud name, API key, API secret, and create an Unsigned Upload Preset.
    - Create a `.env` file from the example:
      ```bash
      cp .env.example .env
      ```
-   - Paste the connection string into `DATABASE_URL` in `.env`. Make sure it ends with `?sslaccept=strict`.
+   - Paste the database connection string into `DATABASE_URL` in `.env`. Make sure it ends with `?sslaccept=strict`.
+   - Fill in your Cloudinary credentials in `.env`.
 
 4. **Push the schema to the database and generate the Prisma Client**
    ```bash
@@ -69,7 +71,12 @@ A production-quality CRUD application built with Next.js 15, TailwindCSS, TypeSc
 
 1. Push the code to a **public** GitHub repository.
 2. Import the repository in [Vercel](https://vercel.com/).
-3. Add the `DATABASE_URL` environment variable in the Vercel project settings.
+3. Add **all** the environment variables from your `.env` file in the Vercel project settings:
+   - `DATABASE_URL` (ensure it ends with `&connection_limit=1` for serverless environments)
+   - `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`
+   - `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET`
+   - `CLOUDINARY_API_KEY`
+   - `CLOUDINARY_API_SECRET`
 4. Set the **Build Command** to:
    ```
    npx prisma generate && next build
@@ -91,6 +98,6 @@ AI (Google Gemini) was used extensively during development:
 1. **Scaffolding**: Generated the Next.js Pages Router project structure and installed all dependencies (Prisma, TailwindCSS, Axios, Lucide React).
 2. **Database layer**: Wrote the Prisma schema with the correct enums (`Category`, `Priority`) and the `Notice` model, plus the singleton client pattern.
 3. **API routes**: Generated server-side API routes (`pages/api/notices/`) with proper HTTP methods, input validation, pagination (`skip`/`take`), and Urgent-first `orderBy`.
-4. **UI components**: Built all React components (`NoticeCard`, `NoticeForm`, `DeleteModal`, `Layout`) with responsive Tailwind styling, animations, and dark-mode support.
-5. **Performance**: Migrated to `getServerSideProps` for instant SSR, added "Load More" pagination, and switched all client requests to Axios.
+4. **UI components**: Built all React components (`NoticeCard`, `NoticeForm`, `DeleteModal`, `NoticeSkeleton`, `Layout`) with responsive Tailwind styling, animations, and dark-mode support.
+5. **Performance**: Built client-side fetching with Skeleton loaders, "Load More" pagination, and switched all client requests to Axios.
 6. **Refinement**: Reviewed the assignment rubric line-by-line to ensure compliance with Pages Router, server-side validation, database-level ordering, and the required README sections.
