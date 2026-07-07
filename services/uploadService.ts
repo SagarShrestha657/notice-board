@@ -41,3 +41,18 @@ export async function uploadImage(file: File): Promise<string> {
     throw new Error(error.response?.data?.error?.message || 'Failed to upload image');
   }
 }
+
+/**
+ * Deletes an image from Cloudinary using our secure backend API route
+ */
+export async function deleteImageFromCloudinary(imageUrl: string): Promise<void> {
+  if (!imageUrl) return;
+  
+  try {
+    await axios.post('/api/upload/delete', { url: imageUrl });
+  } catch (error) {
+    console.error('Failed to delete image from Cloudinary:', error);
+    // We swallow the error here because deleting an image is a background cleanup task
+    // and shouldn't break the user's flow if it fails
+  }
+}

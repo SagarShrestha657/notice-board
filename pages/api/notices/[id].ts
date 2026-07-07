@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../lib/prisma';
 import { NoticeInput } from '../../../lib/types';
+import { deleteImageFromCloudinaryServer } from '../../../lib/cloudinaryServer';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
@@ -40,6 +41,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ message: 'Valid publish date is required' });
       }
 
+      // Check if we need to delete an old image
+      const existingNotice = await prisma.notice.findUnique({ where: { id } });
+      if (existingNotice?.image && existingNotice.image !== image) {
+        await deleteImageFromCloudinaryServer(existingNotice.image);
+      }
+
       const notice = await prisma.notice.update({
         where: { id },
         data: {
@@ -64,9 +71,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'DELETE') {
     try {
+      const existingNotice = await prisma.notice.findUnique({ where: { id } });
+      
       await prisma.notice.delete({
         where: { id }
       });
+      
+      if (existingNotice?.image) {
+        await deleteImageFromCloudinaryServer(existingNotice.image);
+      }
+
       return res.status(200).json({ message: 'Notice deleted successfully' });
     } catch (error: any) {
       if (error.code === 'P2025') {

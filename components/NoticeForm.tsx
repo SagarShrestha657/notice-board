@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { NoticeInput, Category, Priority } from '../lib/types';
 import { createNotice, updateNotice } from '../services/noticeService';
-import { uploadImage } from '../services/uploadService';
+import { uploadImage, deleteImageFromCloudinary } from '../services/uploadService';
 import toast from 'react-hot-toast';
 import { Save, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -165,7 +165,10 @@ export default function NoticeForm({ initialData, isEdit = false }: NoticeFormPr
                   </div>
                   <button
                     type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, image: '' }))}
+                    onClick={() => {
+                      if (formData.image) deleteImageFromCloudinary(formData.image);
+                      setFormData(prev => ({ ...prev, image: '' }));
+                    }}
                     className="text-sm text-red-600 hover:text-red-500 font-medium"
                   >
                     Remove Image
