@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { NoticeInput, Category, Priority } from '../lib/types';
 import { createNotice, updateNotice } from '../services/noticeService';
+import { uploadImage } from '../services/uploadService';
 import toast from 'react-hot-toast';
-import { Save, X } from 'lucide-react';
+import { Save, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface NoticeFormProps {
@@ -23,7 +24,28 @@ export default function NoticeForm({ initialData, isEdit = false }: NoticeFormPr
     publishDate: initialData?.publishDate 
       ? new Date(initialData.publishDate).toISOString().split('T')[0] 
       : new Date().toISOString().split('T')[0],
+    image: initialData?.image || '',
   });
+
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const url = await uploadImage(file);
+      setFormData(prev => ({ ...prev, image: url }));
+      toast.success('Image uploaded successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to upload image');
+    } finally {
+      setIsUploading(false);
+      // Reset input value so same file can be selected again
+      e.target.value = '';
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,6 +148,64 @@ export default function NoticeForm({ initialData, isEdit = false }: NoticeFormPr
           />
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+            Notice Image (Optional)
+          </label>
+          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 dark:border-slate-700 border-dashed rounded-xl relative">
+            <div className="space-y-1 text-center relative z-10">
+              {formData.image ? (
+                <div className="flex flex-col items-center gap-4">
+                  <div className="relative w-full max-w-xs h-40 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <img 
+                      src={formData.image} 
+                      alt="Notice preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, image: '' }))}
+                    className="text-sm text-red-600 hover:text-red-500 font-medium"
+                  >
+                    Remove Image
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <ImageIcon className="mx-auto h-12 w-12 text-slate-400" />
+                  <div className="flex text-sm text-slate-600 dark:text-slate-400 justify-center">
+                    <label
+                      htmlFor="image-upload"
+                      className="relative cursor-pointer bg-white dark:bg-slate-800 rounded-md font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                    >
+                      <span>Upload a file</span>
+                      <input 
+                        id="image-upload" 
+                        name="image-upload" 
+                        type="file" 
+                        accept="image/*"
+                        className="sr-only" 
+                        onChange={handleImageUpload}
+                        disabled={isUploading}
+                      />
+                    </label>
+                    <p className="pl-1">or drag and drop</p>
+                  </div>
+                  <p className="text-xs text-slate-500">PNG, JPG, GIF up to 5MB</p>
+                </>
+              )}
+            </div>
+
+            {isUploading && (
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl">
+                <Loader2 className="w-8 h-8 text-indigo-600 animate-spin mb-2" />
+                <p className="text-sm font-medium text-slate-900 dark:text-white">Uploading & Compressing...</p>
+              </div>
+            )}
+          </div>
+        </div>
+
       </div>
 
       <div className="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-slate-100 dark:border-slate-700">
@@ -138,7 +218,7 @@ export default function NoticeForm({ initialData, isEdit = false }: NoticeFormPr
         </Link>
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isUploading}
           className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50 transition-all disabled:opacity-70 flex items-center gap-2"
         >
           {isSubmitting ? (

@@ -12,6 +12,7 @@ A production-quality CRUD application built with Next.js 15, TailwindCSS, TypeSc
 - **Delete Confirmation**: A modal dialog prevents accidental deletion
 - **Responsive Design**: Fully responsive card layout for desktop and mobile
 - **Dark Mode**: Automatic system-level dark mode support
+- **Image Uploads**: Direct browser-to-Cloudinary image uploads with client-side compression (up to 5MB)
 - **Axios**: All client-side HTTP requests use Axios for clean error handling
 
 ## Tech Stack
@@ -79,7 +80,7 @@ A production-quality CRUD application built with Next.js 15, TailwindCSS, TypeSc
 
 ## One thing I would improve with more time
 
-With more time I would add **image upload support via cloud storage** (e.g. Cloudinary or S3). The schema already has an optional `image` field, but a real implementation would need a file-upload API route, cloud storage integration, and image optimisation — which was outside the scope of the initial build. I would also add Zod-based schema validation shared between the client and server for type-safe, DRY validation.
+With more time I would add Zod-based schema validation shared between the client and server for type-safe, DRY validation. Currently, the validation is done manually on the server.
 
 ---
 
