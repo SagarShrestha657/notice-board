@@ -71,17 +71,17 @@ export default function NoticeCard({ notice, onDelete }: NoticeCardProps) {
           Posted {format(new Date(notice.createdAt), 'MMM d, yyyy')}
         </div>
         
-        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="flex items-center gap-2">
           <Link
             href={`/notices/${notice.id}/edit`}
-            className="p-2 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+            className="p-2 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
             title="Edit notice"
           >
             <Edit2 className="w-4 h-4" />
           </Link>
           <button
             onClick={() => onDelete(notice.id)}
-            className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+            className="p-2 text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
             title="Delete notice"
           >
             <Trash2 className="w-4 h-4" />
